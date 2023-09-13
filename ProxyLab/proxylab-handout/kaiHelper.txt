@@ -1,0 +1,25 @@
+HTTP请求： 请求行 零或多个请求报头 空行（表示终止）
+HTTP请求行： method URI version
+HTTP请求报头： header-name : header-data
+
+HTTP响应： 响应行 零或多个响应报头 空行（表示终止报头） 响应主体
+HTTP响应行： version status-code status-message
+HTTP响应报头提供响应的附加信息： Content-Type表示响应主体的MIME类型/Content-Length表示响应主体的字节大小
+HTTP响应主体： 请求的内容
+
+
+#include <stdio.h>
+
+/* Recommended max cache and object sizes */
+#define MAX_CACHE_SIZE 1049000
+#define MAX_OBJECT_SIZE 102400
+
+/* You won't lose style points for including this long line in your code */
+static const char *user_agent_hdr = "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3\r\n";
+
+// 一个健壮的服务器必须捕获SIGPIPE信号，并检查write函数是否有EPIPE错误（写已关闭的连接超过一次，会引发该错误）
+// 要防止函数报错导致的进程中断
+
+
+cd /opt/kaiProjects/CSAPP_lab/ProxyLab/proxy
+curl -v --max-time 5 --proxy "http://localhost:20812" --output home.html "http://localhost:8080/home.html" 

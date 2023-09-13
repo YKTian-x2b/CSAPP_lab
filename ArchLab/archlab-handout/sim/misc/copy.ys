@@ -1,0 +1,50 @@
+# kai 19030500067-ZY2306441
+# Execution begins at address 0
+    .pos 0
+# Your program should consist of some code that 
+# sets up the stack structure, invokes a function, and then halts.
+irmovq stack, %rsp
+call main
+halt
+# data
+.align 8
+# Source block
+src:
+.quad 0x00a
+.quad 0x0b0
+.quad 0xc00
+# Destination block
+dest:
+.quad 0x111
+.quad 0x222
+.quad 0x333
+
+
+main:
+    irmovq src, %rdi
+    irmovq dest, %rsi
+    irmovq $3, %rdx
+    call copy_block
+    ret
+
+copy_block:
+    irmovq	$0, %rax
+    andq    %rdx, %rdx
+    jmp	test
+loop:
+    irmovq  $8, %r9
+    irmovq  $1, %r10
+    mrmovq  (%rdi), %r8
+    addq    %r9, %rdi
+    rmmovq  %r8, (%rsi)
+    addq    %r9, %rsi
+    xorq    %r8, %rax
+    subq    %r10, %rdx
+test:
+	jg	loop
+	ret
+
+
+# Stack starts here and grows to lower add
+    .pos 0x200
+stack:

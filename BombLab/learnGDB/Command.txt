@@ -1,0 +1,16 @@
+01. gcc -g *.c -o *             # -g 允许gdb进行debug模式
+02. run                         # debug执行
+03. break                       # 打断点
+        break fileName:lineNum
+04. delete                      # 删除断点
+05. next                        # 步进
+06. step                        # 步入
+07. info break                  # 查看断点信息
+08. 直接回车                     # 表示执行上一个命令
+09. finish                      # 跳出当前函数
+10. continue                    # 跳到下一断点
+11. kill                        # 杀死当前run
+12. exit                        # 退出gdb
+13. where/backtrace             # 当前运行的堆栈列表
+14. watch                       # 监视某个全局变量 变量改变则停下
+15. info registers              # 查看寄存器

@@ -1,0 +1,177 @@
+                            | #/* $begin ncopy-ys */
+                            | ##################################################################
+                            | # ncopy.ys - Copy a src block of len words to dst.
+                            | # Return the number of positive words (>0) contained in src.
+                            | #
+                            | # Include your name and ID here.
+                            | # kai 19030500067-ZY2306441
+                            | # Describe how and why you modified the baseline code.
+                            | # Replace all registers plus immediate operations with instruction iaddq
+                            | # Use loop unrolling with k=9
+                            | # Replace all rsi++/rdi++ with 0x8(%rdi)/%rdi+72
+                            | ##################################################################
+                            | # Do not modify this portion
+                            | # Function prologue.
+                            | # %rdi = src, %rsi = dst, %rdx = len
+0x000:                      | ncopy:
+                            | 
+                            | ##################################################################
+0x000: c0f2f6ffffffffffffff | 	iaddq	$-10, %rdx				# len-9 < 0?
+0x00a: 72d401000000000000   | 	jl		BFUnrollLoop2			
+0x013:                      | Loop1:
+0x013: 50170000000000000000 | 	mrmovq 	(%rdi), %rcx			# read val0 from src...
+0x01d: 50870800000000000000 | 	mrmovq 	0x8(%rdi), %r8			# read val1 from src...
+0x027: 50971000000000000000 | 	mrmovq 	0x10(%rdi), %r9			# read val2 from src...
+0x031: 50a71800000000000000 | 	mrmovq 	0x18(%rdi), %r10		# read val3 from src...
+0x03b: 50b72000000000000000 | 	mrmovq 	0x20(%rdi), %r11		# read val4 from src...
+0x045: 50c72800000000000000 | 	mrmovq 	0x28(%rdi), %r12		# read val5 from src...
+0x04f: 50d73000000000000000 | 	mrmovq 	0x30(%rdi), %r13		# read val6 from src...
+0x059: 50e73800000000000000 | 	mrmovq 	0x38(%rdi), %r14		# read val7 from src...
+0x063: 50374000000000000000 | 	mrmovq 	0x40(%rdi), %rbx		# read val8 from src...
+                            | 
+0x06d: 40160000000000000000 | 	rmmovq 	%rcx, (%rsi)			# ...and store it to dst
+0x077: 40860800000000000000 | 	rmmovq 	%r8, 0x8(%rsi)			# ...and store it to dst
+0x081: 40961000000000000000 | 	rmmovq 	%r9, 0x10(%rsi)			# ...and store it to dst
+0x08b: 40a61800000000000000 | 	rmmovq 	%r10, 0x18(%rsi)		# ...and store it to dst
+0x095: 40b62000000000000000 | 	rmmovq 	%r11, 0x20(%rsi)		# ...and store it to dst
+0x09f: 40c62800000000000000 | 	rmmovq 	%r12, 0x28(%rsi)		# ...and store it to dst
+0x0a9: 40d63000000000000000 | 	rmmovq 	%r13, 0x30(%rsi)		# ...and store it to dst
+0x0b3: 40e63800000000000000 | 	rmmovq 	%r14, 0x38(%rsi)		# ...and store it to dst
+0x0bd: 40364000000000000000 | 	rmmovq 	%rbx, 0x40(%rsi)		# ...and store it to dst
+                            | 
+0x0c7: 6211                 | 	andq 	%rcx, %rcx			# val0 <= 0?
+0x0c9: 71dc00000000000000   | 	jle		NextVal1			# true == jmp;
+0x0d2: c0f00100000000000000 | 	iaddq 	$1, %rax			# false == cnt++;
+0x0dc:                      | NextVal1:
+0x0dc: 6288                 | 	andq 	%r8, %r8			# val1 <= 0?
+0x0de: 71f100000000000000   | 	jle		NextVal2			
+0x0e7: c0f00100000000000000 | 	iaddq 	$1, %rax			
+0x0f1:                      | NextVal2:
+0x0f1: 6299                 | 	andq 	%r9, %r9			# val2 <= 0?
+0x0f3: 710601000000000000   | 	jle		NextVal3			
+0x0fc: c0f00100000000000000 | 	iaddq 	$1, %rax			
+0x106:                      | NextVal3:
+0x106: 62aa                 | 	andq 	%r10, %r10			# val3 <= 0?
+0x108: 711b01000000000000   | 	jle		NextVal4			
+0x111: c0f00100000000000000 | 	iaddq 	$1, %rax			
+0x11b:                      | NextVal4:
+0x11b: 62bb                 | 	andq 	%r11, %r11			# val4 <= 0?
+0x11d: 713001000000000000   | 	jle		NextVal5			
+0x126: c0f00100000000000000 | 	iaddq 	$1, %rax			
+0x130:                      | NextVal5:
+0x130: 62cc                 | 	andq 	%r12, %r12			# val5 <= 0?
+0x132: 714501000000000000   | 	jle		NextVal6			
+0x13b: c0f00100000000000000 | 	iaddq 	$1, %rax			
+0x145:                      | NextVal6:
+0x145: 62dd                 | 	andq 	%r13, %r13			# val6 <= 0?
+0x147: 715a01000000000000   | 	jle		NextVal7			
+0x150: c0f00100000000000000 | 	iaddq 	$1, %rax			
+0x15a:                      | NextVal7:
+0x15a: 62ee                 | 	andq 	%r14, %r14			# val7 <= 0?
+0x15c: 716f01000000000000   | 	jle		NextVal8			
+0x165: c0f00100000000000000 | 	iaddq 	$1, %rax	
+0x16f:                      | NextVal8:
+0x16f: 6233                 | 	andq 	%rbx, %rbx			# val8 <= 0?
+0x171: 718401000000000000   | 	jle		NextVal9				
+0x17a: c0f00100000000000000 | 	iaddq 	$1, %rax
+0x184:                      | NextVal9:
+0x184: 50174800000000000000 | 	mrmovq 	0x48(%rdi), %rcx		# read val9 from src...
+0x18e: 40164800000000000000 | 	rmmovq  %rcx, 0x48(%rsi)
+0x198: 6211                 | 	andq 	%rcx, %rcx			# val9 <= 0?
+0x19a: 71ad01000000000000   | 	jle		BFLoop1				
+0x1a3: c0f00100000000000000 | 	iaddq 	$1, %rax			
+0x1ad:                      | BFLoop1:
+0x1ad: c0f75000000000000000 | 	iaddq 	$80, %rdi
+0x1b7: c0f65000000000000000 | 	iaddq	$80, %rsi
+0x1c1: c0f2f6ffffffffffffff | 	iaddq	$-10, %rdx			# len-9 >= 0?
+0x1cb: 751300000000000000   | 	jge		Loop1				# true == Loop;
+0x1d4:                      | BFUnrollLoop2:
+0x1d4: c0f20a00000000000000 | 	iaddq	$10, %rdx
+0x1de: 73f003000000000000   | 	je		Done				# len == 0?
+                            | # 1
+0x1e7: 50170000000000000000 | 	mrmovq 	(%rdi), %rcx		
+0x1f1: 40160000000000000000 | 	rmmovq 	%rcx, (%rsi)		
+0x1fb: 6211                 | 	andq 	%rcx, %rcx			
+0x1fd: 711002000000000000   | 	jle		Unroll1				
+0x206: c0f00100000000000000 | 	iaddq 	$1, %rax			
+0x210:                      | Unroll1:
+0x210: c0f2ffffffffffffffff | 	iaddq	$-1, %rdx			# len == 0?
+0x21a: 73f003000000000000   | 	je		Done
+                            | # 2
+0x223: 50870800000000000000 | 	mrmovq 	0x8(%rdi), %r8		
+0x22d: 40860800000000000000 | 	rmmovq 	%r8, 0x8(%rsi)		
+0x237: 6288                 | 	andq 	%r8, %r8			
+0x239: 714c02000000000000   | 	jle		Unroll2				
+0x242: c0f00100000000000000 | 	iaddq 	$1, %rax			
+0x24c:                      | Unroll2:
+0x24c: c0f2ffffffffffffffff | 	iaddq	$-1, %rdx			# len == 0?
+0x256: 73f003000000000000   | 	je		Done
+                            | # 3
+0x25f: 50971000000000000000 | 	mrmovq 	0x10(%rdi), %r9		
+0x269: 40961000000000000000 | 	rmmovq 	%r9, 0x10(%rsi)		
+0x273: 6299                 | 	andq 	%r9, %r9			
+0x275: 718802000000000000   | 	jle		Unroll3				
+0x27e: c0f00100000000000000 | 	iaddq 	$1, %rax			
+0x288:                      | Unroll3:
+0x288: c0f2ffffffffffffffff | 	iaddq	$-1, %rdx			# len == 0?
+0x292: 73f003000000000000   | 	je		Done
+                            | # 4
+0x29b: 50a71800000000000000 | 	mrmovq 	0x18(%rdi), %r10		
+0x2a5: 40a61800000000000000 | 	rmmovq 	%r10, 0x18(%rsi)		
+0x2af: 62aa                 | 	andq 	%r10, %r10			
+0x2b1: 71c402000000000000   | 	jle		Unroll4				
+0x2ba: c0f00100000000000000 | 	iaddq 	$1, %rax			
+0x2c4:                      | Unroll4:
+0x2c4: c0f2ffffffffffffffff | 	iaddq	$-1, %rdx			# len == 0?
+0x2ce: 73f003000000000000   | 	je		Done
+                            | # 5
+0x2d7: 50b72000000000000000 | 	mrmovq 	0x20(%rdi), %r11		
+0x2e1: 40b62000000000000000 | 	rmmovq 	%r11, 0x20(%rsi)		
+0x2eb: 62bb                 | 	andq 	%r11, %r11			
+0x2ed: 710003000000000000   | 	jle		Unroll5				
+0x2f6: c0f00100000000000000 | 	iaddq 	$1, %rax			
+0x300:                      | Unroll5:
+0x300: c0f2ffffffffffffffff | 	iaddq	$-1, %rdx			# len == 0?
+0x30a: 73f003000000000000   | 	je		Done
+                            | # 6
+0x313: 50c72800000000000000 | 	mrmovq 	0x28(%rdi), %r12		
+0x31d: 40c62800000000000000 | 	rmmovq 	%r12, 0x28(%rsi)		
+0x327: 62cc                 | 	andq 	%r12, %r12			
+0x329: 713c03000000000000   | 	jle		Unroll6				
+0x332: c0f00100000000000000 | 	iaddq 	$1, %rax			
+0x33c:                      | Unroll6:
+0x33c: c0f2ffffffffffffffff | 	iaddq	$-1, %rdx			# len == 0?
+0x346: 73f003000000000000   | 	je		Done
+                            | # 7
+0x34f: 50d73000000000000000 | 	mrmovq 	0x30(%rdi), %r13		
+0x359: 40d63000000000000000 | 	rmmovq 	%r13, 0x30(%rsi)		
+0x363: 62dd                 | 	andq 	%r13, %r13			
+0x365: 717803000000000000   | 	jle		Unroll7				
+0x36e: c0f00100000000000000 | 	iaddq 	$1, %rax			
+0x378:                      | Unroll7:
+0x378: c0f2ffffffffffffffff | 	iaddq	$-1, %rdx			# len == 0?
+0x382: 73f003000000000000   | 	je		Done
+                            | # 8
+0x38b: 50e73800000000000000 | 	mrmovq 	0x38(%rdi), %r14		
+0x395: 40e63800000000000000 | 	rmmovq 	%r14, 0x38(%rsi)		
+0x39f: 62ee                 | 	andq 	%r14, %r14		
+0x3a1: 71b403000000000000   | 	jle		Unroll8			
+0x3aa: c0f00100000000000000 | 	iaddq 	$1, %rax	
+0x3b4:                      | Unroll8:
+0x3b4: c0f2ffffffffffffffff | 	iaddq	$-1, %rdx			# len == 0?
+0x3be: 73f003000000000000   | 	je		Done	
+                            | # 9
+0x3c7: 50d74000000000000000 | 	mrmovq 	0x40(%rdi), %r13		
+0x3d1: 40d64000000000000000 | 	rmmovq 	%r13, 0x40(%rsi)		
+0x3db: 62dd                 | 	andq 	%r13, %r13			
+0x3dd: 71f003000000000000   | 	jle		Done			
+0x3e6: c0f00100000000000000 | 	iaddq 	$1, %rax				
+                            | ##################################################################
+                            | # Do not modify the following section of code
+                            | # Function epilogue.
+0x3f0:                      | Done:
+0x3f0: 90                   | 	ret
+                            | ##################################################################
+                            | # Keep the following label at the end of your function
+0x3f1:                      | End:
+                            | #/* $end ncopy-ys */

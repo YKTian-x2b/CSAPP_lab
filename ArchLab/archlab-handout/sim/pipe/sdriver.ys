@@ -1,0 +1,219 @@
+#######################################################################
+# Test for copying block of size 4;
+#######################################################################
+	.pos 0
+main:	irmovq Stack, %rsp  	# Set up stack pointer
+
+	# Set up arguments for copy function and then invoke it
+	irmovq $4, %rdx		# src and dst have 4 elements
+	irmovq dest, %rsi	# dst array
+	irmovq src, %rdi	# src array
+	call ncopy		 
+	halt			# should halt with num nonzeros in %rax
+StartFun:
+#/* $begin ncopy-ys */
+##################################################################
+# ncopy.ys - Copy a src block of len words to dst.
+# Return the number of positive words (>0) contained in src.
+#
+# Include your name and ID here.
+# kai 19030500067-ZY2306441
+# Describe how and why you modified the baseline code.
+# Replace all registers plus immediate operations with instruction iaddq
+# Use loop unrolling with k=9
+# Replace all rsi++/rdi++ with 0x8(%rdi)/%rdi+72
+##################################################################
+# Do not modify this portion
+# Function prologue.
+# %rdi = src, %rsi = dst, %rdx = len
+ncopy:
+
+##################################################################
+	iaddq	$-9, %rdx				# len-9 < 0?
+	jl		BFUnrollLoop2			
+Loop1:
+	mrmovq 	(%rdi), %rcx			# read val0 from src...
+	mrmovq 	0x8(%rdi), %r8			# read val1 from src...
+	mrmovq 	0x10(%rdi), %r9			# read val2 from src...
+	mrmovq 	0x18(%rdi), %r10		# read val3 from src...
+	mrmovq 	0x20(%rdi), %r11		# read val4 from src...
+	mrmovq 	0x28(%rdi), %r12		# read val5 from src...
+	mrmovq 	0x30(%rdi), %r13		# read val6 from src...
+	mrmovq 	0x38(%rdi), %r14		# read val7 from src...
+	mrmovq 	0x40(%rdi), %rbx		# read val8 from src...
+
+	rmmovq 	%rcx, (%rsi)			# ...and store it to dst
+	rmmovq 	%r8, 0x8(%rsi)			# ...and store it to dst
+	rmmovq 	%r9, 0x10(%rsi)			# ...and store it to dst
+	rmmovq 	%r10, 0x18(%rsi)		# ...and store it to dst
+	rmmovq 	%r11, 0x20(%rsi)		# ...and store it to dst
+	rmmovq 	%r12, 0x28(%rsi)		# ...and store it to dst
+	rmmovq 	%r13, 0x30(%rsi)		# ...and store it to dst
+	rmmovq 	%r14, 0x38(%rsi)		# ...and store it to dst
+	rmmovq 	%rbx, 0x40(%rsi)		# ...and store it to dst
+
+	andq 	%rcx, %rcx			# val0 <= 0?
+	jle		NextVal1			# true == jmp;
+	iaddq 	$1, %rax			# false == cnt++;
+NextVal1:
+	andq 	%r8, %r8			# val1 <= 0?
+	jle		NextVal2			
+	iaddq 	$1, %rax			
+NextVal2:
+	andq 	%r9, %r9			# val2 <= 0?
+	jle		NextVal3			
+	iaddq 	$1, %rax			
+NextVal3:
+	andq 	%r10, %r10			# val3 <= 0?
+	jle		NextVal4			
+	iaddq 	$1, %rax			
+NextVal4:
+	andq 	%r11, %r11			# val4 <= 0?
+	jle		NextVal5			
+	iaddq 	$1, %rax			
+NextVal5:
+	andq 	%r12, %r12			# val5 <= 0?
+	jle		NextVal6			
+	iaddq 	$1, %rax			
+NextVal6:
+	andq 	%r13, %r13			# val6 <= 0?
+	jle		NextVal7			
+	iaddq 	$1, %rax			
+NextVal7:
+	andq 	%r14, %r14			# val7 <= 0?
+	jle		NextVal8			
+	iaddq 	$1, %rax			
+NextVal8:
+	andq 	%rbx, %rbx			# val8 <= 0?
+	jle		BFLoop1				
+	iaddq 	$1, %rax			
+BFLoop1:
+	iaddq 	$72, %rdi
+	iaddq	$72, %rsi
+	iaddq	$-9, %rdx			# len-9 >= 0?
+	jge		Loop1				# true == Loop;
+BFUnrollLoop2:
+	iaddq	$9, %rdx
+	je		Done				# len == 0?
+# 1
+	mrmovq 	(%rdi), %rcx		
+	rmmovq 	%rcx, (%rsi)		
+	andq 	%rcx, %rcx			
+	jle		Unroll1				
+	iaddq 	$1, %rax			
+Unroll1:
+	iaddq	$-1, %rdx			# len == 0?
+	je		Done
+# 2
+	mrmovq 	0x8(%rdi), %r8		
+	rmmovq 	%r8, 0x8(%rsi)		
+	andq 	%r8, %r8			
+	jle		Unroll2				
+	iaddq 	$1, %rax			
+Unroll2:
+	iaddq	$-1, %rdx			# len == 0?
+	je		Done
+# 3
+	mrmovq 	0x10(%rdi), %r9		
+	rmmovq 	%r9, 0x10(%rsi)		
+	andq 	%r9, %r9			
+	jle		Unroll3				
+	iaddq 	$1, %rax			
+Unroll3:
+	iaddq	$-1, %rdx			# len == 0?
+	je		Done
+# 4
+	mrmovq 	0x18(%rdi), %r10		
+	rmmovq 	%r10, 0x18(%rsi)		
+	andq 	%r10, %r10			
+	jle		Unroll4				
+	iaddq 	$1, %rax			
+Unroll4:
+	iaddq	$-1, %rdx			# len == 0?
+	je		Done
+# 5
+	mrmovq 	0x20(%rdi), %r11		
+	rmmovq 	%r11, 0x20(%rsi)		
+	andq 	%r11, %r11			
+	jle		Unroll5				
+	iaddq 	$1, %rax			
+Unroll5:
+	iaddq	$-1, %rdx			# len == 0?
+	je		Done
+# 6
+	mrmovq 	0x28(%rdi), %r12		
+	rmmovq 	%r12, 0x28(%rsi)		
+	andq 	%r12, %r12			
+	jle		Unroll6				
+	iaddq 	$1, %rax			
+Unroll6:
+	iaddq	$-1, %rdx			# len == 0?
+	je		Done
+# 7
+	mrmovq 	0x30(%rdi), %r13		
+	rmmovq 	%r13, 0x30(%rsi)		
+	andq 	%r13, %r13			
+	jle		Unroll7				
+	iaddq 	$1, %rax			
+Unroll7:
+	iaddq	$-1, %rdx			# len == 0?
+	je		Done
+# 8
+	mrmovq 	0x38(%rdi), %r14		
+	rmmovq 	%r14, 0x38(%rsi)		
+	andq 	%r14, %r14			
+	jle		Done				
+	iaddq 	$1, %rax			
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+	ret
+##################################################################
+# Keep the following label at the end of your function
+End:
+#/* $end ncopy-ys */
+EndFun:
+
+###############################
+# Source and destination blocks 
+###############################
+	.align 8
+src:
+	.quad 1
+	.quad 2
+	.quad -3
+	.quad -4
+	.quad 0xbcdefa # This shouldn't get moved
+
+	.align 16
+Predest:
+	.quad 0xbcdefa
+dest:
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+Postdest:
+	.quad 0xdefabc
+
+.align 8
+# Run time stack
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+
+Stack:
